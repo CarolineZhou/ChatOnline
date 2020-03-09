@@ -84,7 +84,7 @@ io.on("connection", function(socket) {
       const color_regex = "^([a-zA-Z0-9])+$";
       const match_color_regex = match_regex[2].match(color_regex);
 
-      if (match_color_regex && match_regex[2].length === 3) {
+      if (match_color_regex && match_regex[2].length === 6) {
         // color format is correct, change font color
         font_color = "#" + match_regex[2];
       } else {
