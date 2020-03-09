@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, user-scalable=no" charset="UTF-8">
+    <title>Chat</title>
+    <link rel="stylesheet" type="text/css" href="./style.css">
+</head>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+<script>
+    // no URL, default: trying to connect to the
+    // host that serves the page
+    function getFormattedMessage(message) {
+        var message_li = document.createElement('li');
+        const regex = '^(\\d+):(.+?):(.+?):((.|\\n)*)$';
+        const msg_match = message.match(regex);
+        const datetime = new Date(parseInt(msg_match[1]));
+        const msg_content = msg_match[4];
+        const time_str = ('00' + datetime.getHours()).slice(-2) + ':'
+            + ('00' + datetime.getMinutes()).slice(-2) + ':'
+            + ('00' + datetime.getSeconds()).slice(-2);
+
+        // add each section individually as div
+        var time_div = document.createElement('div');
+        time_div.innerHTML = time_str + " ";
+        time_div.style.display = "inline";
+        message_li.appendChild(time_div);
+
+        var name_div = document.createElement('div');
+        name_div.innerHTML = msg_match[3] + ": ";
+        name_div.style.display = "inline";
+        name_div.style.color = msg_match[2];
+        message_li.appendChild(name_div);
+
+        var msg_div = document.createElement('div');
+        msg_div.innerHTML = msg_match[4];
+        msg_div.style.display = "inline";
+        message_li.appendChild(msg_div);
+
+        // explicitely set the color of the text for li
+        return message_li;
+    }
+
+    function isUser(message, user_name) {
+        let isUser = false;
+        const regex = '^(\\d+):(.+?):(.+?):((.|\\n)*)$';
+        const msg_match = message.match(regex);
+        const msg_content = msg_match[3];
+        const temp = msg_content.slice(0, user_name.length);
+
+        if (!temp.localeCompare(user_name)) {
+            isUser = true;
+        }
+        return isUser;
+    }
+
+    $(window).on('load', function () {
+        let socket = io();
+        $('form').submit(function (e) {
+            e.preventDefault(); // prevents page reloading
+            socket.emit('chat message', $('#m').val());
+            $('#m').val('');
+            return false;
+        });
+
+        let user_name = document.cookie.slice(9);
+
+        // check if there exists a user_name, if not, then ask for a new name
+        if (!user_name.localeCompare("")) {
+            socket.emit("newName");
+        } else {
+            socket.emit("returnUser", user_name);
+            document.getElementById("username").innerHTML = "";
+            document.getElementById('username').append('You are ' + user_name);
+        }
+
+        socket.on('name', function (name) {
+            document.getElementById("username").innerHTML = "";
+            document.getElementById('username').append('You are ' + name);
+            document.cookie = "username=" + name;
+            user_name = document.cookie.slice(9);
+        });
+
+        socket.on('all history', function (history) {
+            for (let x = 0; x < history.length; x++) {
+                document.getElementById('messages').append(getFormattedMessage(history[x]));
+                if (isUser(history[x], user_name)) {
+                    $('#messages li').last().css("font-weight", "bold");
+                }
+                $('#messages').animate({ scrollTop: $('#messages').prop("scrollHeight") }, 500);
+            }
+        });
+
+        let users_display = [];
+        socket.on('updateOnlineUsers', function (online_users) {
+            users_display = online_users;
+
+            document.getElementById("onlineUsers").innerHTML = "";
+            for (let i = 0; i < users_display.length; i++) {
+                var temp_name = document.createElement('li');
+                temp_name.innerHTML = users_display[i];
+                document.getElementById('onlineUsers').append(temp_name);
+            }
+        });
+
+        socket.on('chat message', function (msg) {
+            document.getElementById('messages').append(getFormattedMessage(msg));
+            if (isUser(msg, user_name)) {
+                $('#messages li').last().css("font-weight", "bold");
+            }
+            $('#messages').animate({ scrollTop: $('#messages').prop("scrollHeight") }, 500);
+        });
+
+        socket.on('error message', function (eMsg) {
+            var txt;
+            if (confirm(eMsg)) {
+                txt = "";
+            }
+            document.getElementById("errorMsg").innerHTML = txt;
+        });
+    });
+</script>
+
+<body class="flexCol">
+    <div id="chat">
+        <div id="leftBox">
+            <div id="usernameBox">
+                <p1 id="username"></p1>
+                <p1 id="errorMsg"></p1>
+            </div>
+            <div id="messageBox">
+                <ul id="messages"></ul>
+            </div>
+        </div>
+
+        <div id="rightBox">
+            <p1>Online Users</p1>
+            <div class="onlineUserWindow">
+                <ul id="onlineUsers"></ul>
+            </div>
+        </div>
+    </div>
+    <div id="inputSection">
+        <form id="input" action="">
+            <input id="m" autocomplete="off" />
+            <button>Send</button>
+        </form>
+    </div>
+</body>
+
+</html>

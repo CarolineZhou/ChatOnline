@@ -1,0 +1,102 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+button:focus {
+    outline: none;
+}
+
+body {
+    font: 13px Helvetica, Arial;
+    height: 100vh;
+    width: 100vw;
+}
+
+.flexCol {
+    display: flex;
+    flex-direction: column;
+}
+
+#chat {
+    display: flex;
+    flex-direction: row;
+    height: 93vh;
+}
+
+#inputSection {
+    height: 5vh;
+}
+
+#leftBox {
+    width: 70vw;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    float: left;
+    margin-bottom: 5.5vh;
+}
+
+#rightBox {
+    width: 30vw;
+    height: 100%;
+    background-color: darkslategrey;
+    float: left;
+    margin-bottom: 5.5vh;
+}
+
+#inputForm {
+    background: white;
+    padding-top: 3px;
+    position: fixed;
+    width: 100%;
+    height: 5vh;
+    margin-bottom: 0.5vh;
+}
+
+form input {
+    background-color: lightgrey;
+    width: 80vw;
+    height:5vh;
+    margin-left: 0.5vw;
+    margin-bottom: 1vh;
+}
+
+form button {
+    width: 18vw;
+    background: rgb(130, 224, 255);
+    border: none;
+    height: 5vh;
+}
+
+#messages {
+    list-style-type: none;
+    width: 100%;
+    padding: 0;
+    position:absolute;
+    overflow:auto;
+    bottom:0;
+    max-height: 100%;
+}
+
+#messages li {
+    padding: 5px 10px;
+}
+
+#messageBox {
+    height: inherit;    
+    position:relative;
+    border: 1px solid black;
+    overflow:auto;
+}
+
+#onlineUsers {
+    list-style-type: none;
+}
+
+#usernameBox {
+    display: block;
+    bottom: 20px;
+    
+}
